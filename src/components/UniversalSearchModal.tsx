@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { NATURAL_LANGUAGE_SEARCH_SUGGESTIONS, MOCK_HERO_SLIDES, MOCK_MOVIES, MOCK_ANIME, MediaItem } from "@/data/mockData";
-import { TVmazeService, normalizeTVmazeShow } from "@/services/tvmaze";
+import { NATURAL_LANGUAGE_SEARCH_SUGGESTIONS, MOCK_HERO_SLIDES, MOCK_MOVIES, MOCK_ANIME } from "@/data/mockData";
+import { SearchEngine, SearchResultItem } from "@/services/search";
 
 interface UniversalSearchModalProps {
   isOpen: boolean;
@@ -14,13 +14,13 @@ export default function UniversalSearchModal({
   onClose,
 }: UniversalSearchModalProps) {
   const [query, setQuery] = useState("");
-  const [liveResults, setLiveResults] = useState<MediaItem[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Perform debounced API call to TVmaze when user types
+  // Debounced search query using ScreenVerse SearchEngine layer
   useEffect(() => {
     if (!query.trim()) {
-      setLiveResults([]);
+      setSearchResults([]);
       setIsLoading(false);
       return;
     }
@@ -28,12 +28,8 @@ export default function UniversalSearchModal({
     setIsLoading(true);
     const timer = setTimeout(async () => {
       try {
-        const rawResults = await TVmazeService.searchShows(query);
-        const normalized = rawResults
-          .filter((res) => res.show && res.show.id)
-          .slice(0, 5)
-          .map((res) => normalizeTVmazeShow(res.show));
-        setLiveResults(normalized);
+        const results = await SearchEngine.search(query, { limit: 6 });
+        setSearchResults(results);
       } catch (err) {
         console.error("Search API error:", err);
       } finally {
@@ -60,18 +56,49 @@ export default function UniversalSearchModal({
 
   if (!isOpen) return null;
 
-  const mockItems = [...MOCK_HERO_SLIDES, ...MOCK_MOVIES, ...MOCK_ANIME];
+  const mockCatalogItems = [...MOCK_HERO_SLIDES, ...MOCK_MOVIES, ...MOCK_ANIME];
   const filteredMock = query
-    ? mockItems.filter(
-        (item) =>
-          item.title.toLowerCase().includes(query.toLowerCase()) ||
-          item.genres.some((g) => g.toLowerCase().includes(query.toLowerCase()))
-      )
-    : mockItems.slice(0, 3);
+    ? mockCatalogItems
+        .filter(
+          (item) =>
+            item.title.toLowerCase().includes(query.toLowerCase()) ||
+            item.genres.some((g) => g.toLowerCase().includes(query.toLowerCase()))
+        )
+        .map((item) => ({
+          id: item.id,
+          title: item.title,
+          type: item.type,
+          year: item.year,
+          rating: item.rating,
+          image: item.poster,
+          overview: item.synopsis,
+          source: "Catalog",
+          sourceId: item.id,
+          url: `/${item.type}/${item.id}`,
+          genres: item.genres,
+          streamingOn: item.streamingOn,
+        }))
+    : [];
 
-  const displayItems = query
-    ? [...liveResults, ...filteredMock.filter((m) => !liveResults.some((l) => l.title === m.title))]
-    : mockItems.slice(0, 4);
+  const displayResults = query
+    ? [
+        ...searchResults,
+        ...filteredMock.filter((m) => !searchResults.some((s) => s.title === m.title)),
+      ]
+    : mockCatalogItems.slice(0, 4).map((item) => ({
+        id: item.id,
+        title: item.title,
+        type: item.type,
+        year: item.year,
+        rating: item.rating,
+        image: item.poster,
+        overview: item.synopsis,
+        source: "Catalog",
+        sourceId: item.id,
+        url: `/${item.type}/${item.id}`,
+        genres: item.genres,
+        streamingOn: item.streamingOn,
+      }));
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/80 backdrop-blur-md transition-opacity">
@@ -101,7 +128,7 @@ export default function UniversalSearchModal({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search TV shows via TVmaze API, movies, anime..."
+            placeholder="Search TV series, movies, anime across ScreenVerse providers..."
             className="w-full bg-transparent text-white placeholder-gray-400 text-base focus:outline-none"
             autoFocus
           />
@@ -119,7 +146,7 @@ export default function UniversalSearchModal({
         {/* Natural Language Prompt Suggestions */}
         <div className="p-4 bg-[#0a0c12] border-b border-gray-800/60">
           <p className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider font-mono">
-            💡 Sample TV & Entertainment Queries
+            💡 Sample Entertainment Queries
           </p>
           <div className="flex flex-wrap gap-2">
             {NATURAL_LANGUAGE_SEARCH_SUGGESTIONS.slice(0, 4).map((suggestion) => (
@@ -139,30 +166,30 @@ export default function UniversalSearchModal({
           <div className="flex justify-between items-center text-xs text-gray-400 mb-1 px-1">
             <span>{query ? `Results for "${query}"` : "Featured Titles"}</span>
             <span className="text-[11px] text-emerald-400 font-mono">
-              TVmaze REST API Layer Active
+              ScreenVerse Search Layer Active
             </span>
           </div>
 
           {isLoading ? (
             <div className="text-center py-8 text-gray-400 text-sm flex items-center justify-center gap-2">
               <span className="w-4 h-4 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
-              Searching TVmaze database...
+              Searching active providers...
             </div>
-          ) : displayItems.length === 0 ? (
+          ) : displayResults.length === 0 ? (
             <div className="text-center py-8 text-gray-400 text-sm">
-              No matching shows or titles found for "{query}".
+              No results found for "{query}". Try a different title or search query.
             </div>
           ) : (
-            displayItems.map((item) => (
+            displayResults.map((item) => (
               <a
                 key={item.id}
-                href={`/${item.type}/${item.id}`}
+                href={item.url}
                 onClick={onClose}
                 className="flex items-center gap-4 p-3 rounded-xl bg-[#121520] hover:bg-[#181c2b] border border-gray-800/80 hover:border-amber-500/40 transition-all group cursor-pointer"
               >
                 <div className="w-12 h-16 rounded-lg bg-gray-800 overflow-hidden flex-shrink-0 relative">
                   <img
-                    src={item.poster}
+                    src={item.image}
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   />
@@ -172,14 +199,19 @@ export default function UniversalSearchModal({
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
                       {item.type}
                     </span>
-                    <span className="text-xs text-gray-400">{item.year}</span>
-                    <span className="text-xs text-amber-400 font-semibold">★ {item.rating}</span>
+                    {item.year && <span className="text-xs text-gray-400">{item.year}</span>}
+                    {item.rating && (
+                      <span className="text-xs text-amber-400 font-semibold">★ {item.rating}</span>
+                    )}
+                    <span className="text-[10px] font-mono text-gray-500 ml-auto bg-gray-800 px-1.5 py-0.5 rounded">
+                      {item.source}
+                    </span>
                   </div>
                   <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors truncate">
                     {item.title}
                   </h4>
                   <p className="text-xs text-gray-400 truncate">
-                    {item.genres.join(" • ")} {item.streamingOn ? `| ${item.streamingOn[0]}` : ""}
+                    {item.overview || (item.genres ? item.genres.join(" • ") : "")}
                   </p>
                 </div>
                 <svg
@@ -202,7 +234,7 @@ export default function UniversalSearchModal({
 
         {/* Footer info bar */}
         <div className="px-5 py-2.5 bg-[#080a0e] border-t border-gray-800 text-[11px] text-gray-400 flex items-center justify-between">
-          <span>TVmaze Public REST API Data Layer</span>
+          <span>ScreenVerse Universal Search Architecture</span>
           <span className="font-mono text-amber-500/80">Press ESC to exit</span>
         </div>
       </div>
