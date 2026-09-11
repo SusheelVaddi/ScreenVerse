@@ -1,209 +1,149 @@
-import HeroSection from "@/components/HeroSection";
-import CategorySection from "@/components/CategorySection";
+import CinematicHero from "@/components/CinematicHero";
+import MoodPicker from "@/components/MoodPicker";
+import FranchiseTimelinePreview from "@/components/FranchiseTimelinePreview";
+import { PosterCard, PersonCard, HorizontalCard } from "@/components/ContentCard";
+import { MOCK_MOVIES, MOCK_SERIES, MOCK_ANIME, MOCK_PEOPLE, MOCK_HERO_SLIDES } from "@/data/mockData";
 
 export default function Home() {
-  const sectionsData = [
-    {
-      id: "movies",
-      title: "Movies",
-      description: "Feature films, blockbusters, independent cinema, and classics.",
-      badge: "Feature Films",
-      badgeColor: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-      items: [
-        {
-          title: "Feature Films Directory",
-          subtitle: "Cast, Directors, Box Office & Media",
-          tag: "Cinema",
-          description:
-            "Exploration pages for movies with cast lists, synopses, trailers, crew profiles, and streaming availability.",
-        },
-        {
-          title: "Cinematic Universes",
-          subtitle: "Connected Movie Collections",
-          tag: "Franchises",
-          description:
-            "Track multi-movie sagas, prequels, sequels, spin-offs, and interconnected storylines.",
-        },
-        {
-          title: "Curated Recommendations",
-          subtitle: "Genre & Director Spotlights",
-          tag: "Discovery",
-          description:
-            "Discover movies by decade, country, mood, awards, runtime, and critical reception.",
-        },
-      ],
-    },
-    {
-      id: "series",
-      title: "TV & Web Series",
-      description: "Episodic shows, web series, miniseries, and seasonal storylines.",
-      badge: "Episodic Content",
-      badgeColor: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
-      items: [
-        {
-          title: "Series & Season Guide",
-          subtitle: "Episodes, Air Dates & Descriptions",
-          tag: "Shows",
-          description:
-            "Detailed breakdowns of seasons, episode guides, guest appearances, and creator details.",
-        },
-        {
-          title: "Web Series & Specials",
-          subtitle: "Digital & Streaming Exclusives",
-          tag: "Digital",
-          description:
-            "Track standalone specials, limited web series, and streaming original productions.",
-        },
-        {
-          title: "Episode Watch Trackers",
-          subtitle: "Progress & Viewing Status",
-          tag: "Tracking",
-          description:
-            "Keep track of watched episodes, season progress, and upcoming episode releases.",
-        },
-      ],
-    },
-    {
-      id: "anime",
-      title: "Anime",
-      description: "Anime series, movies, OVAs, ONAs, arcs, and source material.",
-      badge: "Japanese Animation",
-      badgeColor: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-      items: [
-        {
-          title: "Arcs & Sagas Exploration",
-          subtitle: "Original vs English Titles & Voice Actors",
-          tag: "Anime Guide",
-          description:
-            "Dedicated support for story arcs, filler identification, OVAs, ONAs, and voice actor filmographies.",
-        },
-        {
-          title: "Voice Cast & Characters",
-          subtitle: "Seiyuu Mappings & Character Lore",
-          tag: "Seiyuu Mappings",
-          description:
-            "Connect characters with their original Japanese voice actors and localized voice artists.",
-        },
-        {
-          title: "Manga & Source Context",
-          subtitle: "Adaptation Information",
-          tag: "Source Material",
-          description:
-            "Understand adaptation timelines, light novel origins, and canon storylines.",
-        },
-      ],
-    },
-    {
-      id: "animation",
-      title: "Animation & Cartoons",
-      description: "Animated features, classic cartoons, family series, and shorts.",
-      badge: "Cartoons & Features",
-      badgeColor: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-      items: [
-        {
-          title: "Animated Classics & Shorts",
-          subtitle: "Studio Collections & Short Films",
-          tag: "Animation",
-          description:
-            "Explore timeless animated works, studio catalogs, short films, and groundbreaking techniques.",
-        },
-        {
-          title: "Family & Cartoon Series",
-          subtitle: "Age-Appropriate Entertainment",
-          tag: "Cartoons",
-          description:
-            "Browse animated television shows, cartoon universes, and character-driven stories.",
-        },
-        {
-          title: "Kids Visual Mode",
-          subtitle: "Safe & Friendly Interface",
-          tag: "Kids Mode",
-          description:
-            "Visual discovery experience tailored for younger audiences with strong privacy controls.",
-        },
-      ],
-    },
-    {
-      id: "people",
-      title: "Popular People",
-      description: "Actors, voice actors, directors, writers, creators, and composers.",
-      badge: "Cast & Crew Profiles",
-      badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-      items: [
-        {
-          title: "Comprehensive Filmographies",
-          subtitle: "Career Timelines & Roles",
-          tag: "Filmography",
-          description:
-            "Detailed career histories, characters played across live-action and voice roles, awards, and upcoming projects.",
-        },
-        {
-          title: "Voice Actors & Creators",
-          subtitle: "Behind the Scenes Talent",
-          tag: "Creators",
-          description:
-            "Spotlight directors, showrunners, seiyuu, writers, composers, and studio visionaries.",
-        },
-        {
-          title: "Collaborations & Achievements",
-          subtitle: "Industry Connections",
-          tag: "Insights",
-          description:
-            "Discover frequent director-actor collaborations, franchise participation, and career milestones.",
-        },
-      ],
-    },
-    {
-      id: "franchises",
-      title: "Franchises & Universes",
-      description: "Interactive universes, chronological timelines, and watch orders.",
-      badge: "Watch Orders & Timelines",
-      badgeColor: "bg-pink-500/10 text-pink-400 border-pink-500/20",
-      items: [
-        {
-          title: "Interactive Universe Maps",
-          subtitle: "Marvel, Star Wars, Anime Universes & More",
-          tag: "Universes",
-          description:
-            "Visualize complex story universes, spin-offs, side stories, and interconnected character webs.",
-        },
-        {
-          title: "Custom Viewing Guides",
-          subtitle: "Release vs Chronological Order",
-          tag: "Watch Orders",
-          description:
-            "Follow community and expert-recommended watch orders tailored for new and veteran fans.",
-        },
-        {
-          title: "Character Connection Trees",
-          subtitle: "Entity Graphing",
-          tag: "Relationships",
-          description:
-            "Explore how characters relate to actors, titles, spin-offs, and overarching franchise sagas.",
-        },
-      ],
-    },
-  ];
+  const trendingMovies = [...MOCK_HERO_SLIDES.filter((m) => m.type === "movie"), ...MOCK_MOVIES];
+  const trendingSeries = MOCK_SERIES;
+  const trendingAnime = [...MOCK_HERO_SLIDES.filter((m) => m.type === "anime"), ...MOCK_ANIME];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-      {/* Hero Section with Search Bar Placeholder */}
-      <HeroSection />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 pb-16">
+      {/* 1. HERO / FEATURED SPOTLIGHT STORY */}
+      <CinematicHero />
 
-      {/* Main Category Sections */}
-      <div className="space-y-12 mt-8">
-        {sectionsData.map((section) => (
-          <CategorySection
-            key={section.id}
-            id={section.id}
-            title={section.title}
-            description={section.description}
-            badge={section.badge}
-            badgeColor={section.badgeColor}
-            items={section.items}
-          />
-        ))}
-      </div>
+      {/* 2. TRENDING & CURRENTLY WATCHED SPOTLIGHT */}
+      <section className="space-y-6 pt-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-2xl sm:text-3xl font-bold font-serif text-[#f5f3ef]">
+                Trending Across ScreenVerse
+              </h2>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                Popular Now
+              </span>
+            </div>
+            <p className="text-sm text-gray-400">
+              The most explored movies, series, and anime titles right now.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+          {MOCK_HERO_SLIDES.map((item) => (
+            <PosterCard key={item.id} item={item} />
+          ))}
+        </div>
+      </section>
+
+      {/* 3. DISCOVER BY MOOD */}
+      <MoodPicker />
+
+      {/* 4. EXPLORE MOVIES */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif text-[#f5f3ef]">
+              Explore Movies
+            </h2>
+            <p className="text-sm text-gray-400">
+              Feature films, blockbusters, and award-winning cinema.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {trendingMovies.slice(0, 2).map((item) => (
+            <HorizontalCard key={item.id} item={item} />
+          ))}
+        </div>
+      </section>
+
+      {/* 5. EXPLORE SERIES */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif text-[#f5f3ef]">
+              Explore TV & Web Series
+            </h2>
+            <p className="text-sm text-gray-400">
+              Binge-worthy shows, seasonal sagas, and digital originals.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+          {trendingSeries.map((item) => (
+            <PosterCard key={item.id} item={item} />
+          ))}
+        </div>
+      </section>
+
+      {/* 6. ANIME & ANIMATION SPOTLIGHT */}
+      <section className="space-y-6 bg-[#090b12] border border-purple-500/20 p-6 sm:p-8 rounded-3xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-2xl sm:text-3xl font-bold font-serif text-[#f5f3ef]">
+                Anime & Animation Universe
+              </h2>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                Seiyuu & Arc Support
+              </span>
+            </div>
+            <p className="text-sm text-gray-400">
+              Japanese anime series, movies, OVAs, ONAs, and animated masterpieces.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+          {trendingAnime.map((item) => (
+            <PosterCard key={item.id} item={item} />
+          ))}
+        </div>
+      </section>
+
+      {/* 7. ENTER A UNIVERSE / FRANCHISE EXPLORER */}
+      <FranchiseTimelinePreview />
+
+      {/* 8. POPULAR PEOPLE */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif text-[#f5f3ef]">
+              Popular Actors, Directors & Creators
+            </h2>
+            <p className="text-sm text-gray-400">
+              Explore talent filmographies, roles, and creative masterminds.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-5">
+          {MOCK_PEOPLE.map((person) => (
+            <PersonCard key={person.id} person={person} />
+          ))}
+        </div>
+      </section>
+
+      {/* 9. DISCOVER SOMETHING NEW SPOTLIGHT BANNER */}
+      <section className="relative rounded-3xl overflow-hidden p-8 sm:p-12 bg-gradient-to-r from-amber-950/40 via-[#131624] to-[#0a0c12] border border-amber-500/30 text-center space-y-4">
+        <div className="max-w-2xl mx-auto space-y-3">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+            CINEMATIC DISCOVERY ENGINE
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold font-serif text-white">
+            Uncover Stories You Never Knew Existed
+          </h2>
+          <p className="text-gray-300 text-sm sm:text-base font-light">
+            Whether you are following a 20-year franchise timeline, searching for voice actor filmographies, or discovering mind-bending sci-fi movies, ScreenVerse connects every detail.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

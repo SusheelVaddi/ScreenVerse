@@ -1,32 +1,34 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
+import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const playfair = Playfair_Display({
+  variable: "--font-serif",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "ScreenVerse — Explore Every Story",
   description:
-    "Unified entertainment discovery and exploration platform for movies, TV series, anime, cartoons, animation, characters, people, and franchises.",
+    "A unified, cinematic entertainment discovery platform for movies, TV series, anime, animation, characters, creators, and universes.",
   keywords: [
     "ScreenVerse",
-    "Entertainment Discovery",
-    "Movies",
+    "Cinematic Entertainment",
+    "Movie Discovery",
     "TV Series",
-    "Anime",
-    "Cartoons",
-    "Franchises",
-    "Watch Order",
+    "Anime Watch Order",
+    "Universe Timelines",
+    "Characters",
+    "Voice Actors",
   ],
 };
 
@@ -38,10 +40,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className={`${playfair.variable} ${plusJakarta.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col bg-[#070a11] text-gray-100 selection:bg-blue-500 selection:text-white">
-        <Header />
+      <body className="min-h-full flex flex-col bg-[#07080b] text-[#f5f3ef] selection:bg-amber-500 selection:text-black">
+        <Navbar />
         <main className="flex-grow">{children}</main>
         <Footer />
       </body>

@@ -1,33 +1,95 @@
 @import "tailwindcss";
 
 :root {
-  --background: #070a11;
-  --foreground: #f3f4f6;
-  --card-bg: #0f172a;
-  --card-border: #1e293b;
-  --accent-blue: #3b82f6;
-  --accent-purple: #8b5cf6;
-  --accent-cyan: #06b6d4;
+  --background: #07080b;
+  --surface-dark: #0f1118;
+  --surface-elevated: #161922;
+  --border-muted: #242938;
+  --border-amber: #d97706;
+  --text-primary: #f5f3ef;
+  --text-secondary: #9ca3af;
+  --accent-amber: #f59e0b;
+  --accent-gold: #fbbf24;
 }
 
 body {
   background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  color: var(--text-primary);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
+  position: relative;
 }
 
-/* Custom subtle scrollbar */
+/* Subtle Film Grain Noise Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: radial-gradient(rgba(245, 158, 11, 0.03) 1px, transparent 0);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 99;
+  opacity: 0.6;
+}
+
+/* Spotlight Illumination Cone Background Effect */
+.spotlight-glow {
+  background: radial-gradient(
+    circle at 50% -20%,
+    rgba(245, 158, 11, 0.15) 0%,
+    rgba(99, 102, 241, 0.08) 35%,
+    rgba(7, 8, 11, 0) 70%
+  );
+}
+
+/* Cinema Frame Vignette */
+.cinema-vignette {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(7, 8, 11, 0) 60%,
+    rgba(7, 8, 11, 0.85) 100%
+  );
+}
+
+/* Glassmorphism Surface */
+.glass-panel {
+  background: rgba(15, 17, 24, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-amber {
+  background: rgba(21, 24, 34, 0.8);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* Scrollbar Customization */
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #070a11;
+  background: #07080b;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #1f2433;
   border-radius: 4px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #d97706;
+}
+
+/* Motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
