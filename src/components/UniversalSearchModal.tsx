@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { NATURAL_LANGUAGE_SEARCH_SUGGESTIONS, MOCK_HERO_SLIDES, MOCK_MOVIES, MOCK_ANIME } from "@/data/mockData";
+import { NATURAL_LANGUAGE_SEARCH_SUGGESTIONS, MOCK_HERO_SLIDES, MOCK_MOVIES, MOCK_ANIME, MediaItem } from "@/data/mockData";
+import { TVmazeService, normalizeTVmazeShow } from "@/services/tvmaze";
 
 interface UniversalSearchModalProps {
   isOpen: boolean;
@@ -13,17 +14,41 @@ export default function UniversalSearchModal({
   onClose,
 }: UniversalSearchModalProps) {
   const [query, setQuery] = useState("");
+  const [liveResults, setLiveResults] = useState<MediaItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Perform debounced API call to TVmaze when user types
+  useEffect(() => {
+    if (!query.trim()) {
+      setLiveResults([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const rawResults = await TVmazeService.searchShows(query);
+        const normalized = rawResults
+          .filter((res) => res.show && res.show.id)
+          .slice(0, 5)
+          .map((res) => normalizeTVmazeShow(res.show));
+        setLiveResults(normalized);
+      } catch (err) {
+        console.error("Search API error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [query]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         if (isOpen) onClose();
-        else {
-          // Open search modal
-          const btn = document.querySelector('button[aria-label="Search"]');
-          if (btn) (btn as HTMLElement).click();
-        }
       }
       if (e.key === "Escape" && isOpen) {
         onClose();
@@ -35,15 +60,18 @@ export default function UniversalSearchModal({
 
   if (!isOpen) return null;
 
-  const allItems = [...MOCK_HERO_SLIDES, ...MOCK_MOVIES, ...MOCK_ANIME];
-  const filteredItems = query
-    ? allItems.filter(
+  const mockItems = [...MOCK_HERO_SLIDES, ...MOCK_MOVIES, ...MOCK_ANIME];
+  const filteredMock = query
+    ? mockItems.filter(
         (item) =>
           item.title.toLowerCase().includes(query.toLowerCase()) ||
-          item.genres.some((g) => g.toLowerCase().includes(query.toLowerCase())) ||
-          item.cast.some((c) => c.toLowerCase().includes(query.toLowerCase()))
+          item.genres.some((g) => g.toLowerCase().includes(query.toLowerCase()))
       )
-    : allItems.slice(0, 4);
+    : mockItems.slice(0, 3);
+
+  const displayItems = query
+    ? [...liveResults, ...filteredMock.filter((m) => !liveResults.some((l) => l.title === m.title))]
+    : mockItems.slice(0, 4);
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/80 backdrop-blur-md transition-opacity">
@@ -73,13 +101,16 @@ export default function UniversalSearchModal({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search a movie, series, anime, actor, character, watch order..."
+            placeholder="Search TV shows via TVmaze API, movies, anime..."
             className="w-full bg-transparent text-white placeholder-gray-400 text-base focus:outline-none"
             autoFocus
           />
+          {isLoading && (
+            <span className="w-4 h-4 rounded-full border-2 border-amber-400 border-t-transparent animate-spin mr-3" />
+          )}
           <button
             onClick={onClose}
-            className="ml-3 px-2 py-1 text-xs text-gray-400 hover:text-white bg-gray-800/80 rounded border border-gray-700"
+            className="ml-2 px-2 py-1 text-xs text-gray-400 hover:text-white bg-gray-800/80 rounded border border-gray-700"
           >
             ESC
           </button>
@@ -88,10 +119,10 @@ export default function UniversalSearchModal({
         {/* Natural Language Prompt Suggestions */}
         <div className="p-4 bg-[#0a0c12] border-b border-gray-800/60">
           <p className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider font-mono">
-            💡 Try Natural Language Queries
+            💡 Sample TV & Entertainment Queries
           </p>
           <div className="flex flex-wrap gap-2">
-            {NATURAL_LANGUAGE_SEARCH_SUGGESTIONS.map((suggestion) => (
+            {NATURAL_LANGUAGE_SEARCH_SUGGESTIONS.slice(0, 4).map((suggestion) => (
               <button
                 key={suggestion}
                 onClick={() => setQuery(suggestion)}
@@ -106,18 +137,27 @@ export default function UniversalSearchModal({
         {/* Search Results Preview Container */}
         <div className="max-h-[380px] overflow-y-auto p-4 space-y-3">
           <div className="flex justify-between items-center text-xs text-gray-400 mb-1 px-1">
-            <span>{query ? `Results for "${query}"` : "Featured Discovery Preview"}</span>
-            <span className="text-[11px] text-amber-400 font-mono">UI Preview (Step 4 integration)</span>
+            <span>{query ? `Results for "${query}"` : "Featured Titles"}</span>
+            <span className="text-[11px] text-emerald-400 font-mono">
+              TVmaze REST API Layer Active
+            </span>
           </div>
 
-          {filteredItems.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-400 text-sm flex items-center justify-center gap-2">
+              <span className="w-4 h-4 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
+              Searching TVmaze database...
+            </div>
+          ) : displayItems.length === 0 ? (
             <div className="text-center py-8 text-gray-400 text-sm">
-              No matching titles found for "{query}". Try one of the suggested prompts above!
+              No matching shows or titles found for "{query}".
             </div>
           ) : (
-            filteredItems.map((item) => (
-              <div
+            displayItems.map((item) => (
+              <a
                 key={item.id}
+                href={`/${item.type}/${item.id}`}
+                onClick={onClose}
                 className="flex items-center gap-4 p-3 rounded-xl bg-[#121520] hover:bg-[#181c2b] border border-gray-800/80 hover:border-amber-500/40 transition-all group cursor-pointer"
               >
                 <div className="w-12 h-16 rounded-lg bg-gray-800 overflow-hidden flex-shrink-0 relative">
@@ -139,7 +179,7 @@ export default function UniversalSearchModal({
                     {item.title}
                   </h4>
                   <p className="text-xs text-gray-400 truncate">
-                    {item.genres.join(" • ")} {item.director ? `| Dir: ${item.director}` : ""}
+                    {item.genres.join(" • ")} {item.streamingOn ? `| ${item.streamingOn[0]}` : ""}
                   </p>
                 </div>
                 <svg
@@ -155,14 +195,14 @@ export default function UniversalSearchModal({
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-              </div>
+              </a>
             ))
           )}
         </div>
 
         {/* Footer info bar */}
         <div className="px-5 py-2.5 bg-[#080a0e] border-t border-gray-800 text-[11px] text-gray-400 flex items-center justify-between">
-          <span>ScreenVerse Universal Entertainment Discovery</span>
+          <span>TVmaze Public REST API Data Layer</span>
           <span className="font-mono text-amber-500/80">Press ESC to exit</span>
         </div>
       </div>
